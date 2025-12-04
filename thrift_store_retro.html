@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RedShift Thrift — Retro Thrift Store</title>
+
+  <!-- Retro / pixel font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0b0b0b;
+      --card: #111111;
+      --muted: #bdbdbd;
+      --accent: #f0141e; /* red */
+      --accent-2: #ff605c;
+      --glass: rgba(255,255,255,0.04);
+      --text: #fff;
+      --retro-shadow: 0 6px 0 rgba(0,0,0,0.6);
+    }
+
+    [data-theme="light"]{
+      --bg: #faf6f6;
+      --card: #fff;
+      --muted: #4a4a4a;
+      --accent: #b31212;
+      --accent-2: #ff6b69;
+      --glass: rgba(0,0,0,0.03);
+      --text: #111;
+      --retro-shadow: 0 6px 0 rgba(0,0,0,0.08);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg), #080808 120%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom:60px;
+    }
+
+    /* Header */
+    .header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      padding:20px 28px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      position:sticky;top:0;background:linear-gradient(180deg,rgba(0,0,0,0.3),transparent);
+      backdrop-filter: blur(6px);
+      z-index:40;
+    }
+
+    .brand{
+      display:flex;gap:12px;align-items:center
+    }
+
+    .logo{
+      width:64px;height:64px;border-radius:8px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:var(--retro-shadow);
+      font-family: 'Press Start 2P', cursive;
+      font-size:10px;color:white;
+      letter-spacing:1px;
+    }
+
+    .brand h1{font-size:16px;margin:0}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    .controls{display:flex;gap:10px;align-items:center}
+
+    .btn{
+      background:var(--card);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;cursor:pointer;
+      box-shadow:var(--retro-shadow);
+      font-weight:600;color:var(--text);
+    }
+
+    .search{
+      display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);
+    }
+    .search input{background:transparent;border:0;outline:none;color:var(--text);font-size:14px}
+
+    main{max-width:1100px;margin:28px auto;padding:0 20px}
+
+    .hero{
+      display:flex;gap:20px;align-items:center;padding:28px;border-radius:12px;background:linear-gradient(90deg, rgba(255,16,30,0.06), rgba(0,0,0,0.04));
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    }
+    .hero h2{margin:0;font-family:'Press Start 2P',cursive;font-size:20px}
+    .hero p{margin:6px 0 0;color:var(--muted)}
+
+    /* Product grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:20px}
+    .card{background:var(--card);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:var(--retro-shadow);display:flex;flex-direction:column;gap:10px}
+    .thumb{height:180px;border-radius:8px;background-image:linear-gradient(45deg,rgba(0,0,0,0.2),rgba(255,0,0,0.02)), url('https://images.unsplash.com/photo-1520975913533-3aa5a7f8cfa2?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder');background-size:cover;background-position:center}
+    .meta{display:flex;justify-content:space-between;align-items:center}
+    .meta h3{margin:0;font-size:14px}
+    .price{font-weight:700;color:var(--accent)}
+
+    .tag{font-size:12px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.06);border-radius:8px}
+
+    footer{position:fixed;left:0;right:0;bottom:0;padding:12px 20px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.6));display:flex;justify-content:center}
+    .mini{max-width:1100px;width:100%;display:flex;justify-content:space-between;align-items:center}
+
+    /* tiny responsive */
+    @media (max-width:600px){.hero{flex-direction:column;align-items:flex-start}.brand h1{font-size:14px}.logo{width:52px;height:52px}}
+
+    /* retro decorations */
+    .retro-lines{
+      display:flex;gap:6px;align-items:center
+    }
+    .retro-line{width:36px;height:6px;border-radius:4px;background:linear-gradient(90deg,var(--accent),transparent);box-shadow:0 4px 0 rgba(0,0,0,0.4)}
+
+    /* toggle */
+    .switch{display:inline-flex;align-items:center;gap:8px}
+    .switch input{display:none}
+    .switch .track{width:52px;height:28px;border-radius:20px;background:linear-gradient(90deg,#222,#111);display:flex;padding:4px;align-items:center}
+    .switch .knob{width:20px;height:20px;border-radius:50%;background:var(--accent);box-shadow:0 6px 0 rgba(0,0,0,0.4);transform:translateX(0);transition:transform .22s}
+    [data-theme="light"] .switch .track{background:linear-gradient(90deg,#eee,#ddd)}
+    [data-theme="light"] .switch .knob{background:var(--accent)}
+    .switch input:checked + .track .knob{transform:translateX(24px)}
+
+    /* small helpers */
+    .muted{color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="brand">
+      <div class="logo">RED
+      </div>
+      <div>
+        <h1>RedShift Thrift</h1>
+        <p class="muted">Retro. Curated. Sustainable.</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search" role="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></circle></svg>
+        <input id="q" placeholder="Search vintage tees, denim, decor..." />
+      </div>
+
+      <button class="btn" onclick="openCart()">Cart (0)</button>
+
+      <label class="switch" title="Toggle theme">
+        <input id="themeToggle" type="checkbox" />
+        <div class="track"><div class="knob"></div></div>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div style="flex:1">
+        <h2>Find the one that speaks retro</h2>
+        <p class="muted">Handpicked thrift finds — from arcade tees to classic leather jackets. Feel the vibe, love the planet.</p>
+        <div style="margin-top:12px" class="retro-lines">
+          <div class="retro-line"></div>
+          <div class="retro-line" style="width:56px"></div>
+          <div class="retro-line" style="width:24px"></div>
+        </div>
+      </div>
+      <div style="width:320px">
+        <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="vintage" style="width:100%;border-radius:10px;box-shadow:var(--retro-shadow)" />
+      </div>
+    </section>
+
+    <section style="margin-top:18px;display:flex;gap:12px;align-items:center;justify-content:space-between">
+      <div class="muted">Showing <strong id="count">9</strong> items</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="tag">Category: All</div>
+        <div class="tag">Sort: Newest</div>
+      </div>
+    </section>
+
+    <section class="grid" id="productGrid">
+      <!-- Cards will be injected by script -->
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="mini">
+      <div class="muted">© <span id="yr"></span> RedShift Thrift — Made with ♻️</div>
+      <div class="muted">retro vibes • black & red</div>
+    </div>
+  </footer>
+
+  <script>
+    // Simple product dataset (replace with own images & data)
+    const products = [
+      {id:1,title:'Arcade Logo Tee',price:'₹499',tag:'Top',img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:2,title:'1990s Leather Jacket',price:'₹3,199',tag:'Outerwear',img:'https://images.unsplash.com/photo-1520975921607-0d9f9b8f6ff7?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:3,title:'Denim Overalls',price:'₹1,299',tag:'Bottoms',img:'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:4,title:'Polaroid Camera (Cosmetic)',price:'₹1,999',tag:'Electronics',img:'https://images.unsplash.com/photo-1519183071298-a2962be90b4b?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:5,title:'Windbreaker (Retro Lines)',price:'₹899',tag:'Outerwear',img:'https://images.unsplash.com/photo-1520975913533-3aa5a7f8cfa2?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:6,title:'Checkerboard Slip-Ons',price:'₹599',tag:'Shoes',img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:7,title:'Vintage Band Tee',price:'₹449',tag:'Top',img:'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:8,title:'Retro Sunglasses',price:'₹299',tag:'Accessories',img:'https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'},
+      {id:9,title:'Cassette Wall Art',price:'₹649',tag:'Decor',img:'https://images.unsplash.com/photo-1504805572947-34fad45aed93?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder'}
+    ];
+
+    const grid = document.getElementById('productGrid');
+    const count = document.getElementById('count');
+
+    function render(){
+      grid.innerHTML='';
+      products.forEach(p=>{
+        const el = document.createElement('article');
+        el.className='card';
+        el.innerHTML = `
+          <div class="thumb" style="background-image:linear-gradient(45deg, rgba(0,0,0,0.2), rgba(255,0,0,0.02)), url('${p.img}')"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <h3>${p.title}</h3>
+            <div class="price">${p.price}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="tag">${p.tag}</div>
+            <button class="btn" onclick="addToCart(${p.id})">Add</button>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+      count.textContent = products.length;
+    }
+
+    // Cart (very small demo)
+    let cart = [];
+    function addToCart(id){
+      cart.push(id);
+      document.querySelector('.header .btn').textContent = `Cart (${cart.length})`;
+      // tiny feedback
+      const b = document.createElement('div');
+      b.textContent = 'Added to cart';
+      b.style.position='fixed';b.style.right='20px';b.style.bottom='90px';b.style.padding='8px 12px';b.style.borderRadius='8px';b.style.background='var(--card)';b.style.boxShadow='var(--retro-shadow)';
+      document.body.appendChild(b);
+      setTimeout(()=>b.remove(),1200);
+    }
+
+    function openCart(){
+      alert('Cart demo — items: ' + cart.length + '\nThis is a static template. Connect to your backend to enable checkout.');
+    }
+
+    // Theme toggle + persist
+    const root = document.documentElement;
+    const tgl = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('rs-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', saved);
+    tgl.checked = (saved==='light');
+
+    tgl.addEventListener('change', ()=>{
+      const theme = tgl.checked ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('rs-theme', theme);
+    });
+
+    // small utilities
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // wire search box to simple filter
+    document.getElementById('q').addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = products.filter(p=> p.title.toLowerCase().includes(q) || p.tag.toLowerCase().includes(q));
+      count.textContent = filtered.length;
+      grid.innerHTML='';
+      filtered.forEach(p=>{
+        const el = document.createElement('article');
+        el.className='card';
+        el.innerHTML = `
+          <div class="thumb" style="background-image:linear-gradient(45deg, rgba(0,0,0,0.2), rgba(255,0,0,0.02)), url('${p.img}')"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <h3>${p.title}</h3>
+            <div class="price">${p.price}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="tag">${p.tag}</div>
+            <button class="btn" onclick="addToCart(${p.id})">Add</button>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+    });
+
+    // initial render
+    render();
+  </script>
+
+</body>
+</html>
